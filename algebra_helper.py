@@ -24,30 +24,42 @@ def understand_review_of_step(problem, review):
 
 def switch_sides(term, terms):
     terms.remove(term)
+
+    if get_value_of_term(term) < 0:
+        term = term[1:]
+    else:
+        term = '-' + term
     terms.insert(0,term)
+
     return terms
 
 
 def get_variables_on_same_side(problem):
     terms = get_terms(problem.get_expression())
+    left_terms = list()
+    right_terms = list()
+
+    for term in terms[:terms.index('=')]:
+        left_terms.append(term)
+    for term in terms[terms.index('=')+1:]:
+        right_terms.append(term)
 
     for variable in problem.get_variables():
         left_count = 0
         right_count = 0
-        left_side = True
-        for term in terms:
-            if term is '=':
-                left_side = False
-                pass
-            elif left_side:
-                if variable in term:
-                    left_count += 1
-            else:
-                if variable in term:
-                    right_count += 1
+        for term in left_terms:
+            if variable in term:
+                left_count += 1
+        for term in right_terms:
+            if variable in term:
+                right_count += 1
         if left_count != 0 and right_count != 0:
-            pass
-    return True
+            for term in right_terms:
+                terms = switch_sides(term, terms)
+
+    if not right_terms:
+        right_terms.append('0')
+    return terms
 
 
 def solve_for_var_algebra(problem):
@@ -110,7 +122,11 @@ def get_value_of_term(term):
 
 
 def get_terms(expression):
-    terms = list(re.split("([-+/*])", expression))
+    terms = list(re.split("([-+/*=])", expression))
+    for term in terms:
+        if term in operations:
+            terms.remove(term)
+    terms.remove("")
     signed_terms = list()
     isNegative = False
     for term in terms:

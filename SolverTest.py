@@ -15,6 +15,12 @@ class SolverTest(unittest.TestCase):
         prob = AlgebraProblem('4x + 5y +1 = -3y +2x -3', 'solve')
         self.assertEqual('4x-2x+4=-8y', algebra_helper.get_variables_on_same_side(prob))
 
+    def test_switching_sides1(self):
+        prob = AlgebraProblem('4x+5y=6x-7y','solve')
+        terms = algebra_helper.get_terms(prob.get_expression())
+        term = '6x'
+        self.assertEqual(['-6x','4x','+','5y','=','-7y'], algebra_helper.switch_sides(term, terms))
+
     # def test_combine_like_terms1(self):
     #     terms = ['5x', '10x', '-8y', '4y','3','5','-7']
     #     self.assertEqual({'':1.0, 'x':15.0,'y':-4.0}, algebra_helper.combine_like_terms(terms))
