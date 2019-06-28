@@ -5,7 +5,7 @@ import re
 
 class AlgebraProblem:
     def __init__(self, expression, type_of_problem):
-        self.expression = clean_expression(expression)
+        self.expression = self.clean_expression(expression)
         self.type = type_of_problem
         self.updated_expression = ''
         self.steps = list()
@@ -36,6 +36,9 @@ class AlgebraProblem:
                 variables.add(char)
         return variables
 
+    def clean_expression(self, expression):
+        exp = expression.replace(" ", "")
+        return exp
 
 
 
