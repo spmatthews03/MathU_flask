@@ -4,12 +4,15 @@ import re
 
 
 class AlgebraProblem:
-    def __init__(self, expression, type_of_problem):
+    def __init__(self, expression='', type_of_problem=None):
         self.expression = clean_expression(expression)
         self.type = type_of_problem
         self.updated_expression = ''
         self.steps = list()
-        self.vars = self.get_vars(self.expression)
+        self.vars = self.get_vars()
+
+    def set_type(self, tp):
+        self.type = tp
 
     def add_step(self, step):
         self.steps.append(step)
@@ -23,15 +26,19 @@ class AlgebraProblem:
     def get_type(self):
         return self.type
 
+    def set_expression(self, expression):
+        self.expression = expression
+        self.vars = self.get_vars()
+
     def set_updated_expression(self, expression):
         self.updated_expression = expression
 
     def get_variables(self):
         return self.vars
 
-    def get_vars(self, expression):
+    def get_vars(self):
         variables = set()
-        for char in expression:
+        for char in self.expression:
             if char.isalpha():
                 variables.add(char)
         return variables

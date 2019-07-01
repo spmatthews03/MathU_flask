@@ -1,7 +1,7 @@
 import unittest
 from AlgebraProblem import AlgebraProblem
 import algebra_helper
-
+from Chatbot.Chatbot import ChatBot
 class SolverTest(unittest.TestCase):
     def test_check_solve_for_x(self):
         prob = AlgebraProblem('2x+5-3y+3x','solve')
@@ -20,6 +20,13 @@ class SolverTest(unittest.TestCase):
         terms = algebra_helper.get_terms(prob.get_expression())
         term = '6x'
         self.assertEqual(['-6x','4x','+','5y','=','-7y'], algebra_helper.switch_sides(term, terms))
+
+
+    def test_extract_problem1(self):
+        sentence = 'Can you help me with 2x+5y= - 4 y'
+        cb = ChatBot()
+        self.assertEqual('2x+5y=-4y', cb.extract_problem(sentence))
+
 
     # def test_combine_like_terms1(self):
     #     terms = ['5x', '10x', '-8y', '4y','3','5','-7']

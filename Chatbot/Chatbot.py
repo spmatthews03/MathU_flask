@@ -5,6 +5,8 @@ import json
 import string
 import argparse
 from nltk.chat.util import Chat, reflections
+import AlgebraProblem
+from algebra_helper import *
 
 
 reflections = {
@@ -25,20 +27,34 @@ reflections = {
 }
 
 conversationals = [
-    [r'(.*)(difficult)|(hard)|(easy)|(challenging)|(rigorous)(.*)',
-
+    [r'(.*)(homework)|(problem)(.*)',
         [
-         "According to my data, it is an average difficulty of {0} out of 5.",
-         "The average response is {0} out of 5.",
-         "Depends, do you think {0}/5 is manageable?"
+            "Yeah. What the problem you're working with",
         ]
     ],
-    [r'(.*)(how fun)|( fun )|(rating)|( like )|(.*)',
+    [r'(.*)(can you help)|(will you help)|(please help)(.*)',
+
+        [
+         "I can sure try! Lets take a look...",
+         "Lets see, I think we can figure this out...",
+        ]
+    ],
+    [r'(.*)(solve)(.*)',
+        [
+            "{0}",
+        ]
+    ],
+    [r'(.*)(simplify)(.*)',
+        [
+            "{0}",
+        ]
+     ],
+    [r'(.*)(help)(.*)',
          [
              "{0}",
          ]
     ],
-    [r'(.*)(time)|(spend)|(how long)|(long)|(workload)|(how much)|(work)(.*)',
+    [r'(.*)(The problem is)(.*)',
          [
              "{0}",
          ]
@@ -55,19 +71,25 @@ conversationals = [
     ],
 ]
 
+operations = ['+','*','/','(',')','-']
 
 
 class ChatBot:
-    def __init__(self, reviews):
+    def __init__(self):
         self.name = "MathU"
+        self.introduced = False
+        self.current_prob = AlgebraProblem.AlgebraProblem()
+        self.user_name = ''
+        self.math_steps = list()
 
 
-    def respond(self, statement):
-        response = self.analyze_question(statement)
-        if response is None:
-            return "I'm sorry I couldn't find any information. Did you enter the Course ID?"
+    def respond(self, statement, problem=''):
+        if not self.introduced:
+            return self.introduction()
         else:
+            response = self.analyze_question(statement)
             return response
+
 
     def reflect(self,fragment):
         tokens = fragment.lower().split()
@@ -77,33 +99,44 @@ class ChatBot:
         return ' '.join(tokens)
 
     def analyze_question(self, statement):
-        self.extract_class(statement)
-        if self.classID is not None:
-            for pattern, responses in conversationals:
-                match = re.search(pattern.lower(), statement.lower().rstrip(".!"))
-                if match:
-                    response = random.choice(responses)
-                    return response.format(self.get_class_info(self.classID, match.group(0)))
+        if self.current_prob.get_expression() is '':
+            self.current_prob.set_expression(self.extract_problem(statement))
+
+        for pattern, responses in conversationals:
+            match = re.search(pattern.lower(), statement.lower().rstrip(".!"))
+            if match:
+                response = random.choice(responses)
+
+                for group in match.groups():
+                    if group == 'solve':
+                        self.current_prob.set_type('solve')
+                    if group == 'simplify':
+                        self.current_prob.set_type('simplify')
 
 
-    def extract_class(self, statement):
-        tokens = statement.lower().split()
-        for i, token in enumerate(tokens):
-            token = token.translate(str.maketrans('', '', string.punctuation))
-            if token[-4:].isdigit():
-                self.classID = token[-4:]
+
+                if self.current_prob.get_type() is not None:
+                    if len(self.current_prob.get_vars()) < 2:
+                        if self.current_prob.get_type() is 'solve':
+                            math_steps = solve_for_var_algebra(self.current_prob)
+                        else:
+                            math_steps = simplify_expression(self.current_prob)
+                    if self.current_prob.get_type() is 'simplify':
+                        return simplify_expression(self.current_prob)
 
 
-    def get_class_info(self, class_id, indicator):
-        if any(item in indicator for item in ['easy','hard','difficult','challenging','rigorous']):
-            return get_difficulty(class_id, self.reviews)
-        elif any(item in indicator for item in ['fun','rating','good']):
-            return get_rating(class_id, self.reviews)
-        elif any(item in indicator for item in ['time','how long','spend','long','workload','work']):
-            return get_workload(class_id, self.reviews)
-        elif any(item in indicator for item in ['test','exam','proctor']):
-            return get_exam_info(class_id, self.reviews)
-        elif any(item in indicator for item in ['projects','groups','group']):
-            return get_project_info(class_id, self.reviews)
-        else:
-            return respond()
+
+    def extract_problem(self, sentence):
+        problem = ''
+        for item in sentence:
+            if item.isdigit()  or item in operations:
+                return sentence[sentence.index(item):].replace(" ", "")
+
+
+
+
+
+    def introduction(self):
+        self.introduced = True
+        return "Hi there! My name is MathU. I'm your personal math tutor for your basic algebra problems. How can I help you?"
+

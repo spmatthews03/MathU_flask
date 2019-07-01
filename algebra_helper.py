@@ -15,8 +15,15 @@ def next_step():
 
 
 
-def simplify_expression():
-    return True
+def simplify_expression(problem):
+    terms = get_terms(problem.get_expression())
+
+    simplified_terms, review_of_step = combine_like_terms(terms)
+    # understand_review_of_step(problem, review_of_step)
+    upd_exp = print_new_equation(simplified_terms)
+    problem.set_updated_expression(upd_exp)
+
+    return print_new_equation(simplified_terms)
 
 def understand_review_of_step(problem, review):
     problem.add_step(review)
@@ -64,8 +71,7 @@ def get_variables_on_same_side(problem):
 
 def solve_for_var_algebra(problem):
     # solve implies an equal sign
-    expression = clean_expression(problem.expression)
-    terms = get_terms(expression)
+    terms = get_terms(problem.get_expression())
 
     simplified_terms, review_of_step = combine_like_terms(terms)
     # understand_review_of_step(problem, review_of_step)
@@ -83,7 +89,7 @@ def combine_like_terms(terms):
     counter = {}
     what_was_combined = set()
     for term in terms:
-        if term not in operations:
+        if term not in operations and term != '=':
             try:
                 counter[get_variable_of_term(term)] += get_value_of_term(term)
                 what_was_combined.add(get_variable_of_term(term))
@@ -126,7 +132,10 @@ def get_terms(expression):
     for term in terms:
         if term in operations:
             terms.remove(term)
-    terms.remove("")
+    try:
+        terms.remove("")
+    except:
+        pass
     signed_terms = list()
     isNegative = False
     for term in terms:

@@ -4,45 +4,44 @@ import algebra_helper
 from Chatbot.Chatbot import ChatBot
 
 app = Flask(__name__)
-# chatbot = ChatBot()
+chatbot = ChatBot()
+problems = list()
+questions = list()
+
 
 @app.route('/')
-def hello_world():
-    return 'Hello World!'
+def MathU():
+    return render_template('mathu_screen.html')
 
 
 @app.route('/algebra/solve')
-def input_form():
-    return render_template('expression_input.html')
-
-
-
-
-
-@app.route('/algebra/solve', methods=['POST'])
 def solve_algebraic_expression():
-    expression = request.form['text']
+    expression = request.args.get('msg')
+
     # type_of_problem = request.form['type']
     problem = AlgebraProblem(expression, "solve")
+    problems.append(expression)
+    return algebra_helper.do_problem(problem)
 
 
-    return render_template('expression_input.html', result = algebra_helper.do_problem(problem))
+@app.route('/ask_mathu')
+def ask_mathu():
+    question = request.args.get('msg')
+    questions.append(question)
+    if problems:
+        return chatbot.respond(question, problems.pop())
+    else:
+        return chatbot.respond(question)
 
 
-# @app.route('/algebra/simplify')
-# def solve_algebraic_expression():
-#     return "Simplify Algebra"
-#
-#
-# @app.route('/algebra/evaluate')
-# def solve_algebraic_expression():
-#     return "Evaluate Algebra"
-#
-#
-# @app.route('/math/solve')
-# def solve_algebraic_expression():
-#     return "Solve Math"
+@app.route('/begin_talking_to_mathu')
+def chat_with_mathu():
+    return chatbot.simple_talking()
 
+
+@app.route('/past_problems')
+def past_problems():
+    return problems
 
 
 if __name__ == '__main__':
