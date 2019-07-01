@@ -43,6 +43,9 @@ class AlgebraProblem:
                 variables.add(char)
         return variables
 
+    def clean_expression(self, expression):
+        exp = expression.replace(" ", "")
+        return exp
 
 
 

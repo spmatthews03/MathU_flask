@@ -3,9 +3,7 @@ import re
 operations = ['+','*','/']
 
 def do_problem(problem):
-    if problem.get_type() is 'simplify':
-        return simplify_expression(problem)
-    elif problem.get_type() is 'solve':
+    if problem.get_type() is 'solve':
         return solve_for_var_algebra(problem)
     return "No solution Here!"
 
@@ -24,6 +22,7 @@ def simplify_expression(problem):
     problem.set_updated_expression(upd_exp)
 
     return print_new_equation(simplified_terms)
+
 
 def understand_review_of_step(problem, review):
     problem.add_step(review)
@@ -136,6 +135,7 @@ def get_terms(expression):
         terms.remove("")
     except:
         pass
+
     signed_terms = list()
     isNegative = False
     for term in terms:
@@ -151,42 +151,34 @@ def get_terms(expression):
     return signed_terms
 
 
-def check_power():
-    return True
-
-
-def evaluate_expression(expression):
-    expression = clean_expression(expression)
-    expression_ass_list = list(expression)
-    new_expression = ''
-    number_stack = list()
-
-    for item in expression_ass_list:
-        if item.isdigit():
-            new_expression = new_expression + item
-        else:
-            if len(new_expression) > 0:
-                number_stack.append(new_expression)
-                new_expression = ''
-            if item != ')':
-                number_stack.append(item)
-            else:
-                t = list()
-                while len(number_stack) is not 0:
-                    top = number_stack.pop()
-                    if top is "(":
-                        break
-                    else:
-                        t.append(0, top)
-                temp = 0
-                if len(t) is 1:
-                    temp = t.index(0)
-
-
-
-
-
-    return True
+# def evaluate_expression(expression):
+#     expression = clean_expression(expression)
+#     expression_ass_list = list(expression)
+#     new_expression = ''
+#     number_stack = list()
+#
+#     for item in expression_ass_list:
+#         if item.isdigit():
+#             new_expression = new_expression + item
+#         else:
+#             if len(new_expression) > 0:
+#                 number_stack.append(new_expression)
+#                 new_expression = ''
+#             if item != ')':
+#                 number_stack.append(item)
+#             else:
+#                 t = list()
+#                 while len(number_stack) is not 0:
+#                     top = number_stack.pop()
+#                     if top is "(":
+#                         break
+#                     else:
+#                         t.append(0, top)
+#                 temp = 0
+#                 if len(t) is 1:
+#                     temp = t.index(0)
+#
+#     return True
 
 def clean_expression(expression):
     expression = expression.replace(" ","")
