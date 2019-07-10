@@ -9,11 +9,6 @@ from nltk.chat.util import Chat, reflections
 import AlgebraProblem
 from algebra_helper import *
 from Chatbot.responses import *
-import discord
-import discord.ext.commands
-from discord.ext.commands.errors import *
-
-
 
 
 

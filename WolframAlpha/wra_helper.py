@@ -48,16 +48,3 @@ def ask_wra_solve(question):
     return answer
 
 
-def get_solve_image(question):
-    params = {
-        'appid': get_wolfram_key(),
-        'input': question,
-        'format': 'plaintext'
-    }
-    response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
-    trimmed_subpod = response.text[response.text.index('Possible'):]
-    trimmed_plaintext = trimmed_subpod[trimmed_subpod.index('<plaintext>'):]
-    trimmed_plaintext = trimmed_plaintext.split('<plaintext>')
-    new_plaintext = list(filter(None, trimmed_plaintext))
-    result = (new_plaintext[0].split('</'))[0].splitlines()
-

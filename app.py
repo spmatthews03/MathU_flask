@@ -23,7 +23,7 @@ def solve_algebraic_expression():
     return wra_helper.get_solve_image(expression)
 
 
-@app.route('/ask_mathu')
+@app.route('/ask_mathu', methods=['GET','POST'])
 def ask_mathu():
     question = request.args.get('msg')
     questions.append(question)
