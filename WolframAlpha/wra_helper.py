@@ -4,7 +4,7 @@ import requests
 import wolframalpha
 import json
 
-WOLFRAM_URL = "http://api.wolframalpha.com/v2/query?"
+WOLFRAM_URL = "https://api.wolframalpha.com/v2/query?"
 
 
 def get_wolfram_key():
@@ -27,24 +27,42 @@ def ask_wra_step_by_step(question):
             for subpod in pod['subpods']:
                 if 'Possible' in subpod['title']:
                     steps = subpod['plaintext'].splitlines()
+    print(steps)
     return steps
 
 
 def ask_wra_solve(question):
-    params = {
-        'appid': get_wolfram_key(),
-        'input': question,
-        'output': 'json',
-        'includepodid': 'Result'
-    }
 
-    response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
-    json_obj = json.loads(response.text)
-    answer = list()
-    for pod in json_obj['queryresult']['pods']:
-        for subpod in pod['subpods']:
-            if subpod['title'] == "":
-                answer = subpod['img']['src']
-    return answer
+    if 'graph' in question.lower().split():
+        params = {
+            'appid': get_wolfram_key(),
+            'input': question,
+            'output': 'json',
+        }
+
+        response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
+        json_obj = json.loads(response.text)
+        answer = list()
+        for pod in json_obj['queryresult']['pods']:
+            if "Implicit" in pod['title']:
+                for subpod in pod['subpods']:
+                    answer = subpod['img']['src']
+        return answer
+    else:
+        params = {
+            'appid': get_wolfram_key(),
+            'input': question,
+            'output': 'json',
+            'includepodid': 'Result'
+        }
+
+        response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
+        json_obj = json.loads(response.text)
+        answer = list()
+        for pod in json_obj['queryresult']['pods']:
+            for subpod in pod['subpods']:
+                if subpod['title'] == "":
+                    answer = subpod['img']['src']
+        return answer
 
 

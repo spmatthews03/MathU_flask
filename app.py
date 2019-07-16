@@ -7,7 +7,7 @@ from WolframAlpha import wra_helper
 
 app = Flask(__name__)
 chatbot = ChatBot()
-problems = list()
+problem = ''
 questions = list()
 
 
@@ -16,19 +16,21 @@ def MathU():
     return render_template('mathu_screen.html')
 
 
-@app.route('/solve')
+@app.route('/solve', methods=['GET','POST'])
 def solve_algebraic_expression():
-    expression = request.args.get('msg')
-    problems.append(expression)
-    return wra_helper.get_solve_image(expression)
+    question = request.args.get('msg')
+    global problem
+    problem = question
+    return jsonify(wra_helper.ask_wra_solve(question))
 
 
 @app.route('/ask_mathu', methods=['GET','POST'])
 def ask_mathu():
     question = request.args.get('msg')
-    questions.append(question)
-    if problems:
-        return jsonify(wra_helper.ask_wra_solve(question))
+    global problem
+    problem = question
+    if problem != '':
+        return jsonify(wra_helper.ask_wra_step_by_step(question))
     else:
         return jsonify(wra_helper.ask_wra_step_by_step(question))
 
@@ -40,7 +42,7 @@ def chat_with_mathu():
 
 @app.route('/past_problems')
 def past_problems():
-    return problems
+    return problem
 
 
 def run():
