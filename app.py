@@ -16,6 +16,16 @@ def MathU():
     return render_template('mathu_screen.html')
 
 
+@app.route('/chatbot_question/', methods=['GET','POST'])
+def get_chatbot_question():
+    question = request.args.get('msg')
+    step = request.args.get('step')
+    if step == '1':
+        return 'True'
+    else:
+        return 'False'
+
+
 @app.route('/solve', methods=['GET','POST'])
 def solve_algebraic_expression():
     question = request.args.get('msg')
@@ -30,9 +40,11 @@ def ask_mathu():
     global problem
     problem = question
     if problem != '':
-        return jsonify(wra_helper.ask_wra_step_by_step(question))
+        tmp = jsonify(wra_helper.ask_wra_step_by_step(question))
+        return tmp
     else:
-        return jsonify(wra_helper.ask_wra_step_by_step(question))
+        tmp = jsonify(wra_helper.ask_wra_step_by_step(question))
+        return tmp
 
 
 @app.route('/begin_talking_to_mathu')

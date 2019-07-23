@@ -3,6 +3,8 @@ from flask import render_template, jsonify, request, Flask
 import requests
 import wolframalpha
 import json
+from collections import OrderedDict
+
 
 WOLFRAM_URL = "https://api.wolframalpha.com/v2/query?"
 
@@ -21,17 +23,22 @@ def ask_wra_step_by_step(question):
 
     response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
     json_obj = json.loads(response.text)
-    steps = list()
+    steps = {}
     for pod in json_obj['queryresult']['pods']:
         if pod['title'] == 'Results':
             for subpod in pod['subpods']:
                 if 'Possible' in subpod['title']:
                     steps = subpod['plaintext'].splitlines()
-    print(steps)
     return steps
 
 
 def ask_wra_solve(question):
+    response = {
+        'answer': [],
+        'steps': {}
+    }
+    steps = list()
+
 
     if 'graph' in question.lower().split():
         params = {
@@ -49,20 +56,50 @@ def ask_wra_solve(question):
                     answer = subpod['img']['src']
         return answer
     else:
-        params = {
+        solve_params = {
             'appid': get_wolfram_key(),
             'input': question,
             'output': 'json',
             'includepodid': 'Result'
         }
+        steps_params = {
+            'appid': get_wolfram_key(),
+            'input': question,
+            'podstate': 'Step-by-step solution',
+            'format': 'plaintext',
+            'output': 'json'
+        }
 
-        response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(params))
-        json_obj = json.loads(response.text)
-        answer = list()
-        for pod in json_obj['queryresult']['pods']:
+        solve_response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(solve_params))
+        steps_response = requests.get(WOLFRAM_URL + urllib.parse.urlencode(steps_params))
+
+        json_obj_solve = json.loads(solve_response.text)
+        json_obj_steps = json.loads(steps_response.text)
+
+        for pod in json_obj_solve['queryresult']['pods']:
             for subpod in pod['subpods']:
                 if subpod['title'] == "":
-                    answer = subpod['img']['src']
-        return answer
+                    response['answer'] = subpod['img']['src']
+
+        for pod in json_obj_steps['queryresult']['pods']:
+            if pod['title'] == 'Results':
+                for subpod in pod['subpods']:
+                    if 'Possible' in subpod['title']:
+                        response['steps'] = subpod['plaintext'].splitlines()
+
+        return response
 
 
+def parse_steps(steps):
+    new_steps = {}
+    explanation = []
+    actual_step_string = ''
+    for step in steps:
+        if step[0].isupper():
+            new_steps[actual_step_string] = explanation
+            explanation.clear()
+            actual_step_string = step
+        else:
+            explanation.append(step)
+
+    return new_steps
