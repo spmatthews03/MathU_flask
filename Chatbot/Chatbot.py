@@ -24,11 +24,8 @@ class ChatBot():
         self.math_steps = list()
 
     def respond(self, statement):
-        if not self.introduced:
-            return self.introduction()
-        else:
-            response = self.analyze_question(statement)
-            return response
+        return self.analyze_question(statement)
+
 
     def reflect(self,fragment):
         tokens = fragment.lower().split()
